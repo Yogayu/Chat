@@ -85,7 +85,7 @@ struct MessageView: View {
     }
 
     var body: some View {
-        HStack(alignment: .bottom, spacing: 0) {
+        HStack(alignment: .top, spacing: 0) {
             if !message.user.isCurrentUser {
                 avatarView
             }
@@ -116,7 +116,7 @@ struct MessageView: View {
         .padding(.top, topPadding)
         .padding(.bottom, bottomPadding)
         .padding(.trailing, message.user.isCurrentUser ? MessageView.horizontalNoAvatarPadding : 0)
-        .padding(message.user.isCurrentUser ? .leading : .trailing, MessageView.horizontalBubblePadding)
+        .padding(message.user.isCurrentUser ? .leading : .trailing, message.user.isCurrentUser ?  MessageView.horizontalBubblePadding: 0)
         .frame(maxWidth: UIScreen.main.bounds.width, alignment: message.user.isCurrentUser ? .trailing : .leading)
     }
 
@@ -217,6 +217,15 @@ struct MessageView: View {
         let timeView = messageTimeView()
             .padding(.trailing, 12)
 
+        HStack(alignment: .lastTextBaseline, spacing: 12) {
+            messageView
+            if !message.attachments.isEmpty {
+                Spacer()
+            }
+            // timeView
+        }
+        .padding(.vertical, 8)
+        /*
         Group {
             switch dateArrangement {
             case .hstack:
@@ -228,7 +237,7 @@ struct MessageView: View {
                     timeView
                 }
                 .padding(.vertical, 8)
-            case .vstack:
+            case .vstack, .overlay:
                 VStack(alignment: .leading, spacing: 4) {
                     messageView
                     HStack(spacing: 0) {
@@ -246,6 +255,7 @@ struct MessageView: View {
                     }
             }
         }
+        */
     }
 
     @ViewBuilder

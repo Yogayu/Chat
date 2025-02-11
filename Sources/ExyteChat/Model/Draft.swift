@@ -8,6 +8,7 @@ import ExyteMediaPicker
 public struct DraftMessage {
     public var id: String?
     public let text: String
+    public var thinkText: String?
     public let medias: [Media]
     public let recording: Recording?
     public let replyMessage: ReplyMessage?
@@ -15,12 +16,14 @@ public struct DraftMessage {
 
     public init(id: String? = nil, 
                 text: String,
+                thinkText: String?,
                 medias: [Media],
                 recording: Recording?,
                 replyMessage: ReplyMessage?,
                 createdAt: Date) {
         self.id = id
         self.text = text
+        self.thinkText = thinkText
         self.medias = medias
         self.recording = recording
         self.replyMessage = replyMessage

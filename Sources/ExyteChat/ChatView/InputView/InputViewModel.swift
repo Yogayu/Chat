@@ -9,6 +9,7 @@ import ExyteMediaPicker
 final class InputViewModel: ObservableObject {
 
     @Published var text = ""
+    @Published var thinkText = ""
     @Published var attachments = InputViewAttachments()
     @Published var state: InputViewState = .empty
 
@@ -219,6 +220,7 @@ private extension InputViewModel {
             .compactMap { [attachments] _ in
                 DraftMessage(
                     text: self.text,
+                    thinkText: self.thinkText,
                     medias: attachments.medias,
                     recording: attachments.recording,
                     replyMessage: attachments.replyMessage,

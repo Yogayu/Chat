@@ -56,11 +56,14 @@ public struct Message: Identifiable, Hashable {
 
     public var triggerRedraw: UUID?
 
+    public var thinkText: String?
+
     public init(id: String,
                 user: User,
                 status: Status? = nil,
                 createdAt: Date = Date(),
                 text: String = "",
+                thinkText: String? = "",
                 attachments: [Attachment] = [],
                 recording: Recording? = nil,
                 replyMessage: ReplyMessage? = nil) {

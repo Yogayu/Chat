@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import MarkdownUI
 
 struct MessageTextView: View {
 
@@ -20,12 +21,24 @@ struct MessageTextView: View {
 
     @ViewBuilder
     private func textView(_ text: String) -> some View {
-        if messageUseMarkdown,
-           let attributed = try? AttributedString(markdown: text, options: String.markdownOptions) {
-            Text(attributed)
-        } else {
-            Text(text)
-        }
+
+        Markdown(text)
+            .markdownBlockStyle(\.blockquote) { configuration in
+              configuration.label
+                .padding()
+                .markdownTextStyle {
+                    FontCapsVariant(.lowercaseSmallCaps)
+                    FontSize(13)
+                    FontWeight(.light)
+                    BackgroundColor(nil)
+                }
+                .overlay(alignment: .leading) {
+                  Rectangle()
+                    .fill(Color.gray)
+                    .frame(width: 4)
+                }
+                .background(Color.gray.opacity(0.2))
+            }
     }
 }
 
