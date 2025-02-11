@@ -3,10 +3,10 @@ Pod::Spec.new do |s|
   s.version          = "2.1.2"
   s.summary          = "Chat with fully customizable message cells and built-in media picker written with SwiftUI"
 
-  s.homepage         = 'https://github.com/exyte/Chat.git'
+  s.homepage         = 'https://github.com/Yogayu/Chat.git'
   s.license          = 'MIT'
   s.author           = { 'Exyte' => 'info@exyte.com' }
-  s.source           = { :git => 'https://github.com/exyte/Chat.git', :tag => s.version.to_s }
+  s.source           = { :git => 'https://github.com/Yogayu/Chat.git', :tag => s.version.to_s }
   s.social_media_url = 'http://exyte.com'
 
   s.ios.deployment_target = '16.0'
