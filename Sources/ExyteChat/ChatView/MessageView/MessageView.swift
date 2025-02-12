@@ -104,14 +104,14 @@ struct MessageView: View {
                 bubbleView(message)
             }
 
-            if message.user.isCurrentUser, let status = message.status {
-                MessageStatusView(status: status) {
-                    if case let .error(draft) = status {
-                        viewModel.sendMessage(draft)
-                    }
-                }
-                .sizeGetter($statusSize)
-            }
+//            if message.user.isCurrentUser, let status = message.status {
+//                MessageStatusView(status: status) {
+//                    if case let .error(draft) = status {
+//                        viewModel.sendMessage(draft)
+//                    }
+//                }
+//                .sizeGetter($statusSize)
+//            }
         }
         .padding(.top, topPadding)
         .padding(.bottom, bottomPadding)
