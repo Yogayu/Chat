@@ -24,7 +24,7 @@ let package = Package(
             from: "2.0.2"
         ),
         .package(
-            url: "https://github.com/exyte/MediaPicker.git",
+            url: "https://github.com/Yogayu/MediaPicker.git",
             from: "2.0.0"
         ),
         .package(
