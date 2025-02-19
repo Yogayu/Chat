@@ -27,7 +27,6 @@ struct MessageTextView: View {
               configuration.label
                 .padding()
                 .markdownTextStyle {
-                    FontCapsVariant(.lowercaseSmallCaps)
                     FontSize(13)
                     FontWeight(.light)
                     BackgroundColor(nil)
