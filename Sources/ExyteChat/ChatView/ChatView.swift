@@ -121,6 +121,11 @@ public struct ChatView<MessageContent: View, InputViewContent: View, MenuAction:
     var messageFont = UIFontMetrics.default.scaledFont(for: UIFont.systemFont(ofSize: 15))
     var availablelInput: AvailableInputType = .full
     var recorderSettings: RecorderSettings = RecorderSettings()
+    
+    // MARK: - Thinking Mode Properties
+    var supportsThinkingMode: Bool = false
+    var isThinkingModeEnabled: Bool = false
+    var onThinkingModeToggle: (() -> Void)? = nil
 
     @StateObject private var viewModel = ChatViewModel()
     @StateObject private var inputViewModel = InputViewModel()
@@ -370,7 +375,10 @@ public struct ChatView<MessageContent: View, InputViewContent: View, MenuAction:
                     availableInput: availablelInput,
                     messageUseMarkdown: messageUseMarkdown,
                     recorderSettings: recorderSettings,
-                    localization: localization
+                    localization: localization,
+                    supportsThinkingMode: supportsThinkingMode,
+                    isThinkingModeEnabled: isThinkingModeEnabled,
+                    onThinkingModeToggle: onThinkingModeToggle
                 )
             }
         }
@@ -609,6 +617,26 @@ public extension ChatView {
     func setRecorderSettings(_ settings: RecorderSettings) -> ChatView {
         var view = self
         view.recorderSettings = settings
+        return view
+    }
+    
+    // MARK: - Thinking Mode Configuration
+    
+    /// Configure thinking mode support and state
+    /// - Parameters:
+    ///   - supportsThinkingMode: Whether the model supports thinking mode
+    ///   - isEnabled: Current thinking mode state
+    ///   - onToggle: Callback when thinking mode is toggled
+    /// - Returns: Updated ChatView
+    func setThinkingMode(
+        supportsThinkingMode: Bool,
+        isEnabled: Bool = false,
+        onToggle: (() -> Void)? = nil
+    ) -> ChatView {
+        var view = self
+        view.supportsThinkingMode = supportsThinkingMode
+        view.isThinkingModeEnabled = isEnabled
+        view.onThinkingModeToggle = onToggle
         return view
     }
 

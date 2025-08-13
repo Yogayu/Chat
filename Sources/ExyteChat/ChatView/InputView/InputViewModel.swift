@@ -114,6 +114,9 @@ public class InputViewModel: ObservableObject {
             reset()
         case .cancelEdit:
             reset()
+        case .toggleThinkingMode:
+            // This action will be handled by the parent view through onThinkingModeToggle closure
+            break
         }
     }
 

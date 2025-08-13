@@ -40,6 +40,9 @@ public enum InputViewAction {
 
     case saveEdit
     case cancelEdit
+    
+    // MARK: - Thinking Mode Action
+    case toggleThinkingMode
 }
 
 public enum InputViewState {
@@ -97,6 +100,11 @@ struct InputView: View {
     var recorderSettings: RecorderSettings = RecorderSettings()
     var localization: ChatLocalization
     
+    // MARK: - Thinking Mode Properties
+    var supportsThinkingMode: Bool = false
+    var isThinkingModeEnabled: Bool = false
+    var onThinkingModeToggle: (() -> Void)? = nil
+    
     @StateObject var recordingPlayer = RecordingPlayer()
 
     private var onAction: (InputViewAction) -> Void {
@@ -130,6 +138,13 @@ struct InputView: View {
                 .background {
                     RoundedRectangle(cornerRadius: 18)
                         .fill(theme.colors.inputBG)
+                }
+                
+                
+                // Thinking Mode Button (between rightView and rightOutsideButton)
+                if supportsThinkingMode && state != .editing {
+                    thinkingModeButton
+                        .frame(height: 48)
                 }
 
                 rightOutsideButton
@@ -573,5 +588,23 @@ struct InputView: View {
                 }
                 dragStart = nil
             }
+    }
+
+    // MARK: - Thinking Mode Button
+    @ViewBuilder
+    var thinkingModeButton: some View {
+        Button(action: {
+            if let onThinkingModeToggle = onThinkingModeToggle {
+                onThinkingModeToggle()
+            } else {
+                onAction(.toggleThinkingMode)
+            }
+        }) {
+            Image(systemName: isThinkingModeEnabled ? "lightbulb.max" : "lightbulb.max.fill")
+                .font(.system(size: 20))
+                .foregroundColor(isThinkingModeEnabled ? theme.colors.sendButtonBackground : .gray)
+                .frame(width: 32, height: 32)
+        }
+        .disabled(state == .isRecordingTap || state == .isRecordingHold || state == .hasRecording || state == .playingRecording || state == .pausedRecording)
     }
 }

@@ -134,21 +134,24 @@ struct RecordWaveformPlaying: View {
     }
 
     func adjustedSamples(_ maxWidth: CGFloat) -> [CGFloat] {
-        let maxSamples = Int((maxWidth - RecordWaveformWithButtons.viewPadding) / (RecordWaveform.width + RecordWaveform.spacing))
+        let maxSamples = max(1, Int((maxWidth - RecordWaveformWithButtons.viewPadding) / (RecordWaveform.width + RecordWaveform.spacing)))
         let temp = samples
+        
+        if temp.isEmpty {
+            return temp
+        }
         
         if temp.count <= maxSamples {
             return temp
         }
 
-        // use ceil to ensure that the adjusted.count will not be greater than maxSamples
-        let ratio = Int(ceil( Double(temp.count) / Double(maxSamples) ))
+        let ratio = max(1, Int(ceil(Double(temp.count) / Double(maxSamples))))
+        
         let adjusted = stride(from: 0, to: temp.count, by: ratio).map {
             temp[$0]
         }
         
         return adjusted
-        
     }
 }
 
