@@ -8,19 +8,19 @@
 import SwiftUI
 import MarkdownUI
 
-struct MessageTextView: View {
+public struct MessageTextView: View {
 
     let text: String?
     let messageUseMarkdown: Bool
 
-    var body: some View {
+    public var body: some View {
         if let text = text, !text.isEmpty {
             textView(text)
         }
     }
 
     @ViewBuilder
-    private func textView(_ text: String) -> some View {
+    public func textView(_ text: String) -> some View {
 
         Markdown(text)
             .markdownBlockStyle(\.blockquote) { configuration in

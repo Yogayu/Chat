@@ -6,7 +6,7 @@ import Foundation
 import Combine
 import ExyteMediaPicker
 
-final class InputViewModel: ObservableObject {
+public class InputViewModel: ObservableObject {
 
     @Published var text = ""
     @Published var thinkText = ""

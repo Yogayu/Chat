@@ -330,9 +330,13 @@ public struct ChatView<MessageContent: View, InputViewContent: View, MenuAction:
         .onPreferenceChange(MessageMenuPreferenceKey.self) {
             self.cellFrames = $0
         }
-        .onTapGesture {
-            globalFocusState.focus = nil
-        }
+        .background(
+            Color.clear
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    globalFocusState.focus = nil
+                }
+        )
         .onAppear {
             viewModel.didSendMessage = didSendMessage
             viewModel.inputViewModel = inputViewModel
@@ -342,11 +346,12 @@ public struct ChatView<MessageContent: View, InputViewContent: View, MenuAction:
                 Task { @MainActor in
                     didSendMessage(value)
                 }
-                if type == .conversation {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                        NotificationCenter.default.post(name: .onScrollToBottom, object: nil)
-                    }
-                }
+                // remove auto scroll
+                // if type == .conversation {
+                //     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                //         NotificationCenter.default.post(name: .onScrollToBottom, object: nil)
+                //     }
+                // }
             }
         }
     }
