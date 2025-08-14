@@ -88,7 +88,6 @@ struct LLMMessageTextView: View {
         self.messageId = messageId
         self.isAssistantMessage = isAssistantMessage
         self.isStreamingMessage = isStreamingMessage
-        print("llm message")
     }
     
     var body: some View {
