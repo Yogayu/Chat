@@ -10,6 +10,9 @@ import SwiftUI
 struct MessageView: View {
 
     @Environment(\.chatTheme) private var theme
+    
+    @Environment(\.streamingMessageId) private var streamingMessageId
+    
 
     @ObservedObject var viewModel: ChatViewModel
 
@@ -36,6 +39,10 @@ struct MessageView: View {
     static let horizontalBubblePadding: CGFloat = 70
 
     var font: UIFont
+    
+    private var isStreamingMessage: Bool {
+        streamingMessageId == message.id
+    }
 
     enum DateArrangement {
         case hstack, vstack, overlay
@@ -210,21 +217,42 @@ struct MessageView: View {
 
     @ViewBuilder
     func textWithTimeView(_ message: Message) -> some View {
-        let messageView = MessageTextView(text: message.text, messageUseMarkdown: messageUseMarkdown)
-            .fixedSize(horizontal: false, vertical: true)
-            .padding(.horizontal, MessageView.horizontalTextPadding)
+        
+        if #available(iOS 17.0, *) {
+            let messageView = LLMMessageTextView(text: message.text, messageUseMarkdown: true, messageId: message.id, isAssistantMessage: !message.user.isCurrentUser, isStreamingMessage: isStreamingMessage)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, MessageView.horizontalTextPadding)
+            let timeView = messageTimeView()
+                .padding(.trailing, 12)
 
-        let timeView = messageTimeView()
-            .padding(.trailing, 12)
-
-        HStack(alignment: .lastTextBaseline, spacing: 12) {
-            messageView
-            if !message.attachments.isEmpty {
-                Spacer()
+            HStack(alignment: .lastTextBaseline, spacing: 12) {
+                messageView
+                if !message.attachments.isEmpty {
+                    Spacer()
+                }
+                // timeView
             }
-            // timeView
+            .padding(.vertical, 8)
+        } else {
+            let messageView = MessageTextView(text: message.text, messageUseMarkdown: messageUseMarkdown)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, MessageView.horizontalTextPadding)
+            let timeView = messageTimeView()
+                .padding(.trailing, 12)
+
+            HStack(alignment: .lastTextBaseline, spacing: 12) {
+                messageView
+                if !message.attachments.isEmpty {
+                    Spacer()
+                }
+                // timeView
+            }
+            .padding(.vertical, 8)
+            // Fallback on earlier versions
         }
-        .padding(.vertical, 8)
+        
+        
+        
         /*
         Group {
             switch dateArrangement {

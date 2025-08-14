@@ -10,6 +10,18 @@ import FloatingButton
 import SwiftUIIntrospect
 import ExyteMediaPicker
 
+
+private struct StreamingMessageIdKey: EnvironmentKey {
+    static let defaultValue: String? = nil
+}
+
+extension EnvironmentValues {
+    var streamingMessageId: String? {
+        get { self[StreamingMessageIdKey.self] }
+        set { self[StreamingMessageIdKey.self] = newValue }
+    }
+}
+
 public typealias MediaPickerParameters = SelectionParamsHolder
 
 public enum ChatType {
@@ -148,6 +160,10 @@ public struct ChatView<MessageContent: View, InputViewContent: View, MenuAction:
     @State private var menuCellOpacity: CGFloat = 0
     @State private var menuScrollView: UIScrollView?
 
+    
+    // MARK: - Streaming Support
+    var streamingMessageProvider: (() -> String?)? = nil
+    
     public init(messages: [Message],
                 chatType: ChatType = .conversation,
                 replyMode: ReplyMode = .quote,
@@ -163,12 +179,18 @@ public struct ChatView<MessageContent: View, InputViewContent: View, MenuAction:
         self.inputViewBuilder = inputViewBuilder
         self.messageMenuAction = messageMenuAction
     }
+    
+    public func setStreamingMessageProvider(_ provider: @escaping () -> String?) -> Self {
+        var copy = self
+        copy.streamingMessageProvider = provider
+        return copy
+    }
 
     public var body: some View {
         mainView
             .background(theme.colors.mainBG)
             .environmentObject(keyboardState)
-
+            .environment(\.streamingMessageId, streamingMessageProvider?() ?? nil)
             .fullScreenCover(isPresented: $viewModel.fullscreenAttachmentPresented) {
                 let attachments = sections.flatMap { section in section.rows.flatMap { $0.message.attachments } }
                 let index = attachments.firstIndex { $0.id == viewModel.fullscreenAttachmentItem?.id }
