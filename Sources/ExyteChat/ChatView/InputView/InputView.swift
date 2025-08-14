@@ -140,7 +140,6 @@ struct InputView: View {
                         .fill(theme.colors.inputBG)
                 }
                 
-                
                 // Thinking Mode Button (between rightView and rightOutsideButton)
                 if supportsThinkingMode && state != .editing {
                     thinkingModeButton

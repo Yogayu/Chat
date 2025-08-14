@@ -351,12 +351,12 @@ public struct ChatView<MessageContent: View, InputViewContent: View, MenuAction:
                 Task { @MainActor in
                     didSendMessage(value)
                 }
-                // remove auto scroll
-                // if type == .conversation {
-                //     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                //         NotificationCenter.default.post(name: .onScrollToBottom, object: nil)
-                //     }
-                // }
+                
+                if type == .conversation {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        NotificationCenter.default.post(name: .onScrollToBottom, object: nil)
+                    }
+                }
             }
         }
     }

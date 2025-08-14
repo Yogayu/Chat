@@ -65,11 +65,7 @@ struct UIList<MessageContent: View, InputView: View>: UIViewRepresentable {
         tableView.isScrollEnabled = isScrollEnabled
 
         NotificationCenter.default.addObserver(forName: .onScrollToBottom, object: nil, queue: nil) { _ in
-            DispatchQueue.main.async {
-                if !context.coordinator.sections.isEmpty {
-                    tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .bottom, animated: true)
-                }
-            }
+            scrollToBottom(tableView)
         }
 
         DispatchQueue.main.async {
@@ -79,6 +75,15 @@ struct UIList<MessageContent: View, InputView: View>: UIViewRepresentable {
         }
 
         return tableView
+    }
+    
+    func scrollToBottom(_ tableView: UITableView) {
+        DispatchQueue.main.async {
+            guard tableView.contentSize.height > tableView.frame.height else { return }
+            // 180 rot
+            let bottomOffset = CGPoint(x: 0, y: 0)
+            tableView.setContentOffset(bottomOffset, animated: true)
+        }
     }
 
     func updateUIView(_ tableView: UITableView, context: Context) {
