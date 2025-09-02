@@ -147,9 +147,9 @@ public struct RecorderSettings : Codable,Hashable {
     var linearPCMIsBigEndianKey: Bool
     var linearPCMIsNonInterleaved: Bool
 
-    public init(audioFormatID: AudioFormatID = kAudioFormatMPEG4AAC,
-                sampleRate: CGFloat = 12000,
-                numberOfChannels: Int = 1,
+    public init(audioFormatID: AudioFormatID = kAudioFormatLinearPCM,
+                sampleRate: CGFloat = 44100,
+                numberOfChannels: Int = 2,
                 encoderBitRateKey: Int = 128,
                 linearPCMBitDepth: Int = 16,
                 linearPCMIsFloatKey: Bool = false,
