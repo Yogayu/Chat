@@ -8,7 +8,7 @@
 import Combine
 import AVFoundation
 
-final class RecordingPlayer: ObservableObject {
+final class RecordingPlayer: NSObject, ObservableObject {
 
     @Published var playing = false
     @Published var duration: Double = 0.0
@@ -24,16 +24,35 @@ final class RecordingPlayer: ObservableObject {
     private var player: AVPlayer?
     private var timeObserver: Any?
 
-    init() {
-        try? audioSession.setCategory(.playback)
-        try? audioSession.overrideOutputAudioPort(.speaker)
+    override init() {
+        super.init()
+        do {
+            try audioSession.setCategory(.playback, mode: .default, options: [.defaultToSpeaker])
+            try audioSession.setActive(true)
+        } catch {
+            print("[RecordingPlayer] Error configuring audio session: \(error)")
+        }
     }
 
     func play(_ recording: Recording) {
+        guard let url = recording.url else { 
+            return 
+        }
+        
+        do {
+            let audioSession = AVAudioSession.sharedInstance()
+            
+            try audioSession.setCategory(.playback, mode: .default, options: [.defaultToSpeaker])
+            try audioSession.setActive(true)
+        } catch {
+            print("[RecordingPlayer] Failed to activate audio session: \(error)")
+        }
+        
         self.recording = recording
-        if let url = recording.url {
-            setupPlayer(for: url, trackDuration: recording.duration)
-            play()
+        setupPlayer(for: url, trackDuration: recording.duration)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+            self?.play()
         }
     }
 
@@ -89,7 +108,12 @@ final class RecordingPlayer: ObservableObject {
     }
 
     private func play() {
-        try? audioSession.setActive(true)
+        do {
+            try audioSession.setActive(true)
+        } catch {
+            print("[RecordingPlayer] Error activating audio session: \(error)")
+        }
+        
         player?.play()
         playing = true
         NotificationCenter.default.post(name: .chatAudioIsPlaying, object: self)
@@ -105,6 +129,9 @@ final class RecordingPlayer: ObservableObject {
 
         let playerItem = AVPlayerItem(url: url)
         player = AVPlayer(playerItem: playerItem)
+        
+        // Add observer for player item status changes
+        playerItem.addObserver(self, forKeyPath: "status", options: [.new, .initial], context: nil)
         
         NotificationCenter.default.addObserver(forName: .chatAudioIsPlaying, object: nil, queue: .main) { notification in
             if let sender = notification.object as? RecordingPlayer {
@@ -134,6 +161,51 @@ final class RecordingPlayer: ObservableObject {
             self?.progress = time.seconds / item.duration.seconds
             self?.secondsLeft = (item.duration - time).seconds.rounded()
         }
+    }
+    
+    // MARK: - KVO Observer
+    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        if keyPath == "status" {
+            if let playerItem = object as? AVPlayerItem {
+                switch playerItem.status {
+                case .readyToPlay:
+                    let audioTracks = playerItem.asset.tracks(withMediaType: .audio)
+                    
+                    self.player?.volume = 1.0
+                    
+                    for (index, _) in audioTracks.enumerated() {
+                        if index < playerItem.tracks.count {
+                            let playerItemTrack = playerItem.tracks[index]
+                            playerItemTrack.isEnabled = true
+                        }
+                    }
+                    
+                case .failed:
+                    if let error = playerItem.error {
+                        print("[RecordingPlayer] Player item failed with error: \(error.localizedDescription)")
+                        if let underlyingError = (error as NSError).userInfo[NSUnderlyingErrorKey] as? NSError {
+                            print("[RecordingPlayer] Underlying error: \(underlyingError.localizedDescription)")
+                        }
+                    }
+                    
+                case .unknown:
+                    break
+                    
+                @unknown default:
+                    break
+                }
+            }
+        }
+    }
+    
+    deinit {
+        // Remove observers
+        NotificationCenter.default.removeObserver(self)
+        if let timeObserver = timeObserver {
+            player?.removeTimeObserver(timeObserver)
+        }
+        // Remove KVO observer
+        player?.currentItem?.removeObserver(self, forKeyPath: "status")
     }
 
 }
