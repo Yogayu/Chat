@@ -31,6 +31,7 @@ struct AttachmentsEditor<InputViewContent: View>: View {
 
     @State private var seleсtedMedias: [Media] = []
     @State private var currentFullscreenMedia: Media?
+    @State private var userDidSelectMedia = false
 
     var showingAlbums: Bool {
         inputViewModel.mediaPickerMode == .albums
@@ -50,6 +51,7 @@ struct AttachmentsEditor<InputViewContent: View>: View {
         GeometryReader { g in
             MediaPicker(isPresented: $inputViewModel.showPicker) {
                 seleсtedMedias = $0
+                userDidSelectMedia = !$0.isEmpty
                 assembleSelectedMedia()
             } albumSelectionBuilder: { _, albumSelectionView, _ in
                 VStack {
@@ -85,15 +87,22 @@ struct AttachmentsEditor<InputViewContent: View>: View {
             .background(theme.colors.mainBG)
             .ignoresSafeArea(.all)
             .onChange(of: currentFullscreenMedia) { newValue in
+                if newValue != nil {
+                    userDidSelectMedia = true
+                }
                 assembleSelectedMedia()
             }
             .onChange(of: inputViewModel.showPicker) { _ in
                 let showFullscreenPreview = mediaPickerSelectionParameters?.showFullscreenPreview ?? true
                 let selectionLimit = mediaPickerSelectionParameters?.selectionLimit ?? 1
 
-                if selectionLimit == 1 && !showFullscreenPreview {
-                    assembleSelectedMedia()
-                    inputViewModel.send()
+                if !inputViewModel.showPicker {
+                    if selectionLimit == 1 && !showFullscreenPreview && userDidSelectMedia {
+                        assembleSelectedMedia()
+                        inputViewModel.send()
+                    }
+                    // Reset the flag when picker is closed
+                    userDidSelectMedia = false
                 }
             }
             .mediaPickerTheme(
