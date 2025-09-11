@@ -151,7 +151,7 @@ struct LLMMessageTextView: View {
     @ViewBuilder
     private func typewriterView() -> some View {
         if messageUseMarkdown {
-            MarkdownTextViewWrapper(text: "[displayedText]" + displayedText)
+            MarkdownTextViewWrapper(text: displayedText)
         } else {
             Text(displayedText)
                 .font(.body)
@@ -165,9 +165,9 @@ struct LLMMessageTextView: View {
     @ViewBuilder
     private func staticView(_ text: String) -> some View {
         if messageUseMarkdown && isAssistantMessage {
-            MarkdownTextViewWrapper(text: "[staticView Markdown]" + text)
+            MarkdownTextViewWrapper(text: text)
         } else {
-            Text("[staticView]" + text)
+            Text(text)
                 .font(.body)
                 .foregroundColor(.black)
         }
