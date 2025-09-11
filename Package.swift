@@ -24,6 +24,10 @@ let package = Package(
             from: "2.0.2"
         ),
         .package(
+            url: "https://github.com/Lakr233/MarkdownView",
+            from: "3.4.0"
+        ),
+        .package(
             url: "https://github.com/Yogayu/MediaPicker.git",
             from: "2.0.0"
         ),
@@ -41,7 +45,8 @@ let package = Package(
             name: "ExyteChat",
             dependencies: [
                 .product(name: "SwiftUIIntrospect", package: "swiftui-introspect"),
-                .product(name: "MarkdownUI", package: "swift-markdown-ui"),
+                .product(name: "MarkdownView", package: "MarkdownView"),
+                .product(name: "MarkdownParser", package: "MarkdownView"),
                 .product(name: "ExyteMediaPicker", package: "MediaPicker"),
                 .product(name: "FloatingButton", package: "FloatingButton"),
                 .product(name: "ActivityIndicatorView", package: "ActivityIndicatorView")

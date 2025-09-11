@@ -1,13 +1,13 @@
 //
 //  MessageMenu.swift
-//  
+//
 //
 //  Created by Alisa Mylnikova on 20.03.2023.
 //
 
-import SwiftUI
 import FloatingButton
 import enum FloatingButton.Alignment
+import SwiftUI
 
 public protocol MessageMenuAction: Equatable, CaseIterable {
     func title() -> String
@@ -15,10 +15,9 @@ public protocol MessageMenuAction: Equatable, CaseIterable {
 }
 
 public enum DefaultMessageMenuAction: MessageMenuAction {
-
     case copy
     case reply
-    case edit(saveClosure: (String)->Void)
+    case edit(saveClosure: (String) -> Void)
 
     public func title() -> String {
         switch self {
@@ -54,12 +53,11 @@ public enum DefaultMessageMenuAction: MessageMenuAction {
     }
 
     public static var allCases: [DefaultMessageMenuAction] = [
-        .copy, .reply, .edit(saveClosure: {_ in})
+        .copy, .reply, .edit(saveClosure: { _ in }),
     ]
 }
 
 struct MessageMenu<MainButton: View, ActionEnum: MessageMenuAction>: View {
-
     @Environment(\.chatTheme) private var theme
 
     @Binding var isShowingMenu: Bool
@@ -68,7 +66,7 @@ struct MessageMenu<MainButton: View, ActionEnum: MessageMenuAction>: View {
     var leadingPadding: CGFloat
     var trailingPadding: CGFloat
     var font: UIFont? = nil
-    var onAction: (ActionEnum) -> ()
+    var onAction: (ActionEnum) -> Void
     var mainButton: () -> MainButton
 
     var getFont: Font? {
@@ -78,7 +76,7 @@ struct MessageMenu<MainButton: View, ActionEnum: MessageMenuAction>: View {
             return nil
         }
     }
-    
+
     var body: some View {
         FloatingButton(
             mainButtonView: mainButton().allowsHitTesting(false),
@@ -88,7 +86,7 @@ struct MessageMenu<MainButton: View, ActionEnum: MessageMenuAction>: View {
             isOpen: $isShowingMenu
         )
         .straight()
-        //.mainZStackAlignment(.top)
+        // .mainZStackAlignment(.top)
         .initialOpacity(0)
         .direction(.bottom)
         .alignment(alignment)

@@ -11,14 +11,14 @@ import SwiftUIIntrospect
 import ExyteMediaPicker
 
 
-private struct StreamingMessageIdKey: EnvironmentKey {
-    static let defaultValue: String? = nil
+private struct StreamingMessageProviderKey: EnvironmentKey {
+    static let defaultValue: StreamingMessageProvider? = nil
 }
 
 extension EnvironmentValues {
-    var streamingMessageId: String? {
-        get { self[StreamingMessageIdKey.self] }
-        set { self[StreamingMessageIdKey.self] = newValue }
+    var streamingMessageProvider: StreamingMessageProvider? {
+        get { self[StreamingMessageProviderKey.self] }
+        set { self[StreamingMessageProviderKey.self] = newValue }
     }
 }
 
@@ -161,8 +161,8 @@ public struct ChatView<MessageContent: View, InputViewContent: View, MenuAction:
     @State private var menuScrollView: UIScrollView?
 
     
-    // MARK: - Streaming Support
-    var streamingMessageProvider: (() -> String?)? = nil
+    // MARK: - Streaming Support 
+    var streamingMessageProvider: StreamingMessageProvider? = nil
     
     public init(messages: [Message],
                 chatType: ChatType = .conversation,
@@ -180,7 +180,7 @@ public struct ChatView<MessageContent: View, InputViewContent: View, MenuAction:
         self.messageMenuAction = messageMenuAction
     }
     
-    public func setStreamingMessageProvider(_ provider: @escaping () -> String?) -> Self {
+    public func setStreamingMessageProvider(_ provider: StreamingMessageProvider?) -> Self {
         var copy = self
         copy.streamingMessageProvider = provider
         return copy
@@ -190,7 +190,7 @@ public struct ChatView<MessageContent: View, InputViewContent: View, MenuAction:
         mainView
             .background(theme.colors.mainBG)
             .environmentObject(keyboardState)
-            .environment(\.streamingMessageId, streamingMessageProvider?() ?? nil)
+            .environment(\.streamingMessageProvider, streamingMessageProvider)
             .fullScreenCover(isPresented: $viewModel.fullscreenAttachmentPresented) {
                 let attachments = sections.flatMap { section in section.rows.flatMap { $0.message.attachments } }
                 let index = attachments.firstIndex { $0.id == viewModel.fullscreenAttachmentItem?.id }

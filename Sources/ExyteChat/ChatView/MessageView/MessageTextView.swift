@@ -1,15 +1,14 @@
 //
-//  SwiftUIView.swift
-//  
+//  MessageTextView.swift
+//
 //
 //  Created by Alex.M on 07.07.2022.
 //
 
+import MarkdownView
 import SwiftUI
-import MarkdownUI
 
 public struct MessageTextView: View {
-
     let text: String?
     let messageUseMarkdown: Bool
 
@@ -21,23 +20,7 @@ public struct MessageTextView: View {
 
     @ViewBuilder
     public func textView(_ text: String) -> some View {
-
-        Markdown(text)
-            .markdownBlockStyle(\.blockquote) { configuration in
-              configuration.label
-                .padding()
-                .markdownTextStyle {
-                    FontSize(13)
-                    FontWeight(.light)
-                    BackgroundColor(nil)
-                }
-                .overlay(alignment: .leading) {
-                  Rectangle()
-                    .fill(Color.gray)
-                    .frame(width: 4)
-                }
-                .background(Color.gray.opacity(0.2))
-            }
+        MarkdownTextViewWrapper(text: text)
     }
 }
 

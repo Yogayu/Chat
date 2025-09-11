@@ -8,11 +8,9 @@
 import SwiftUI
 
 struct MessageView: View {
-
     @Environment(\.chatTheme) private var theme
-    
-    @Environment(\.streamingMessageId) private var streamingMessageId
-    
+
+    @Environment(\.streamingMessageProvider) private var streamingMessageProvider
 
     @ObservedObject var viewModel: ChatViewModel
 
@@ -39,9 +37,17 @@ struct MessageView: View {
     static let horizontalBubblePadding: CGFloat = 70
 
     var font: UIFont
-    
+
     private var isStreamingMessage: Bool {
-        streamingMessageId == message.id
+        // Use injected StreamingMessageProvider protocol to determine streaming state
+        // This avoids direct dependency on specific LLMChatViewModel type
+        return streamingMessageProvider?.isMessageStreaming(message.id) ?? false
+    }
+
+    private var isOutputComplete: Bool {
+        // Determine if output is complete based on outputCompleteAnimating state
+        let streamingState = streamingMessageProvider?.getStreamingState(message.id)
+        return streamingState == .outputCompleteAnimating
     }
 
     enum DateArrangement {
@@ -56,10 +62,10 @@ struct MessageView: View {
         let timeWidth = timeSize.width + 10
         let textPaddings = MessageView.horizontalTextPadding * 2
         let widthWithoutMedia = UIScreen.main.bounds.width
-        - (message.user.isCurrentUser ? MessageView.horizontalNoAvatarPadding : avatarViewSize.width)
-        - statusSize.width
-        - MessageView.horizontalBubblePadding
-        - textPaddings
+            - (message.user.isCurrentUser ? MessageView.horizontalNoAvatarPadding : avatarViewSize.width)
+            - statusSize.width
+            - MessageView.horizontalBubblePadding
+            - textPaddings
 
         let maxWidth = message.attachments.isEmpty ? widthWithoutMedia : MessageView.widthWithMedia - textPaddings
         let finalWidth = message.text.width(withConstrainedWidth: maxWidth, font: font, messageUseMarkdown: messageUseMarkdown)
@@ -77,8 +83,8 @@ struct MessageView: View {
 
     var showAvatar: Bool {
         positionInUserGroup == .single
-        || (chatType == .conversation && positionInUserGroup == .last)
-        || (chatType == .comments && positionInUserGroup == .first)
+            || (chatType == .conversation && positionInUserGroup == .last)
+            || (chatType == .comments && positionInUserGroup == .first)
     }
 
     var topPadding: CGFloat {
@@ -123,7 +129,7 @@ struct MessageView: View {
         .padding(.top, topPadding)
         .padding(.bottom, bottomPadding)
         .padding(.trailing, message.user.isCurrentUser ? MessageView.horizontalNoAvatarPadding : 0)
-        .padding(message.user.isCurrentUser ? .leading : .trailing, message.user.isCurrentUser ?  MessageView.horizontalBubblePadding: 0)
+        .padding(message.user.isCurrentUser ? .leading : .trailing, message.user.isCurrentUser ? MessageView.horizontalBubblePadding : 0)
         .frame(maxWidth: UIScreen.main.bounds.width, alignment: message.user.isCurrentUser ? .trailing : .leading)
     }
 
@@ -217,11 +223,13 @@ struct MessageView: View {
 
     @ViewBuilder
     func textWithTimeView(_ message: Message) -> some View {
-        
         if #available(iOS 17.0, *) {
-            let messageView = LLMMessageTextView(text: message.text, messageUseMarkdown: true, messageId: message.id, isAssistantMessage: !message.user.isCurrentUser, isStreamingMessage: isStreamingMessage)
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.horizontal, MessageView.horizontalTextPadding)
+            let messageView = LLMMessageTextView(text: message.text, messageUseMarkdown: true, messageId: message.id, isAssistantMessage: !message.user.isCurrentUser, isStreamingMessage: isStreamingMessage, isOutputComplete: isOutputComplete, onAnimationComplete: {
+                // Post notification that animation has completed
+                NotificationCenter.default.post(name: NSNotification.Name("StreamingAnimationCompleted"), object: message.id)
+            })
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.horizontal, MessageView.horizontalTextPadding)
             let timeView = messageTimeView()
                 .padding(.trailing, 12)
 
@@ -250,40 +258,38 @@ struct MessageView: View {
             .padding(.vertical, 8)
             // Fallback on earlier versions
         }
-        
-        
-        
+
         /*
-        Group {
-            switch dateArrangement {
-            case .hstack:
-                HStack(alignment: .lastTextBaseline, spacing: 12) {
-                    messageView
-                    if !message.attachments.isEmpty {
-                        Spacer()
-                    }
-                    timeView
-                }
-                .padding(.vertical, 8)
-            case .vstack, .overlay:
-                VStack(alignment: .leading, spacing: 4) {
-                    messageView
-                    HStack(spacing: 0) {
-                        Spacer()
-                        timeView
-                    }
-                }
-                .padding(.vertical, 8)
-            case .overlay:
-                messageView
-                    .padding(.vertical, 8)
-                    .overlay(alignment: .bottomTrailing) {
-                        timeView
-                            .padding(.vertical, 8)
-                    }
-            }
-        }
-        */
+         Group {
+             switch dateArrangement {
+             case .hstack:
+                 HStack(alignment: .lastTextBaseline, spacing: 12) {
+                     messageView
+                     if !message.attachments.isEmpty {
+                         Spacer()
+                     }
+                     timeView
+                 }
+                 .padding(.vertical, 8)
+             case .vstack, .overlay:
+                 VStack(alignment: .leading, spacing: 4) {
+                     messageView
+                     HStack(spacing: 0) {
+                         Spacer()
+                         timeView
+                     }
+                 }
+                 .padding(.vertical, 8)
+             case .overlay:
+                 messageView
+                     .padding(.vertical, 8)
+                     .overlay(alignment: .bottomTrailing) {
+                         timeView
+                             .padding(.vertical, 8)
+                     }
+             }
+         }
+         */
     }
 
     @ViewBuilder
@@ -313,13 +319,11 @@ struct MessageView: View {
 }
 
 extension View {
-
     @ViewBuilder
     func bubbleBackground(_ message: Message, theme: ChatTheme, isReply: Bool = false) -> some View {
         let radius: CGFloat = !message.attachments.isEmpty ? 12 : 20
         let additionalMediaInset: CGFloat = message.attachments.count > 1 ? 2 : 0
-        self
-            .frame(width: message.attachments.isEmpty ? nil : MessageView.widthWithMedia + additionalMediaInset)
+        frame(width: message.attachments.isEmpty ? nil : MessageView.widthWithMedia + additionalMediaInset)
             .foregroundColor(message.user.isCurrentUser ? theme.colors.messageMyText : theme.colors.messageFriendText)
             .background {
                 if isReply || !message.text.isEmpty || message.recording != nil {
@@ -333,52 +337,52 @@ extension View {
 }
 
 #if DEBUG
-struct MessageView_Preview: PreviewProvider {
-    static let stan = User(id: "stan", name: "Stan", avatarURL: nil, isCurrentUser: false)
-    static let john = User(id: "john", name: "John", avatarURL: nil, isCurrentUser: true)
+    struct MessageView_Preview: PreviewProvider {
+        static let stan = User(id: "stan", name: "Stan", avatarURL: nil, isCurrentUser: false)
+        static let john = User(id: "john", name: "John", avatarURL: nil, isCurrentUser: true)
 
-    static private var shortMessage = "Hi, buddy!"
-    static private var longMessage = "Hello hello hello hello hello hello hello hello hello hello hello hello hello\n hello hello hello hello d d d d d d d d"
+        private static var shortMessage = "Hi, buddy!"
+        private static var longMessage = "Hello hello hello hello hello hello hello hello hello hello hello hello hello\n hello hello hello hello d d d d d d d d"
 
-    static private var replyedMessage = Message(
-        id: UUID().uuidString,
-        user: stan,
-        status: .read,
-        text: longMessage,
-        attachments: [
-            Attachment.randomImage(),
-            Attachment.randomImage(),
-            Attachment.randomImage(),
-            Attachment.randomImage(),
-            Attachment.randomImage(),
-        ]
-    )
+        private static var replyedMessage = Message(
+            id: UUID().uuidString,
+            user: stan,
+            status: .read,
+            text: longMessage,
+            attachments: [
+                Attachment.randomImage(),
+                Attachment.randomImage(),
+                Attachment.randomImage(),
+                Attachment.randomImage(),
+                Attachment.randomImage(),
+            ]
+        )
 
-    static private var message = Message(
-        id: UUID().uuidString,
-        user: stan,
-        status: .read,
-        text: shortMessage,
-        replyMessage: replyedMessage.toReplyMessage()
-    )
+        private static var message = Message(
+            id: UUID().uuidString,
+            user: stan,
+            status: .read,
+            text: shortMessage,
+            replyMessage: replyedMessage.toReplyMessage()
+        )
 
-    static var previews: some View {
-        ZStack {
-            Color.yellow.ignoresSafeArea()
+        static var previews: some View {
+            ZStack {
+                Color.yellow.ignoresSafeArea()
 
-            MessageView(
-                viewModel: ChatViewModel(),
-                message: replyedMessage,
-                positionInUserGroup: .single,
-                chatType: .conversation,
-                avatarSize: 32,
-                tapAvatarClosure: nil,
-                messageUseMarkdown: false,
-                isDisplayingMessageMenu: false,
-                showMessageTimeView: true,
-                font: UIFontMetrics.default.scaledFont(for: UIFont.systemFont(ofSize: 15))
-            )
+                MessageView(
+                    viewModel: ChatViewModel(),
+                    message: replyedMessage,
+                    positionInUserGroup: .single,
+                    chatType: .conversation,
+                    avatarSize: 32,
+                    tapAvatarClosure: nil,
+                    messageUseMarkdown: false,
+                    isDisplayingMessageMenu: false,
+                    showMessageTimeView: true,
+                    font: UIFontMetrics.default.scaledFont(for: UIFont.systemFont(ofSize: 15))
+                )
+            }
         }
     }
-}
 #endif

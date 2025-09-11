@@ -1,6 +1,6 @@
 //
 //  ChatMessageView.swift
-//  
+//
 //
 //  Created by Alisa Mylnikova on 20.03.2023.
 //
@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct ChatMessageView<MessageContent: View>: View {
-
     typealias MessageBuilderClosure = ChatView<MessageContent, EmptyView, DefaultMessageMenuAction>.MessageBuilderClosure
 
     @ObservedObject var viewModel: ChatViewModel
@@ -32,9 +31,10 @@ struct ChatMessageView<MessageContent: View>: View {
                     row.positionInUserGroup,
                     row.commentsPosition,
                     { viewModel.messageMenuRow = row },
-                    viewModel.messageMenuAction()) { attachment in
-                        self.viewModel.presentAttachmentFullScreen(attachment)
-                    }
+                    viewModel.messageMenuAction()
+                ) { attachment in
+                    self.viewModel.presentAttachmentFullScreen(attachment)
+                }
             } else {
                 MessageView(
                     viewModel: viewModel,
@@ -46,7 +46,8 @@ struct ChatMessageView<MessageContent: View>: View {
                     messageUseMarkdown: messageUseMarkdown,
                     isDisplayingMessageMenu: isDisplayingMessageMenu,
                     showMessageTimeView: showMessageTimeView,
-                    font: messageFont)
+                    font: messageFont
+                )
             }
         }
         .id(row.message.id)
