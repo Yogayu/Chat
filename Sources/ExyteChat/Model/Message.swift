@@ -57,6 +57,8 @@ public struct Message: Identifiable, Hashable {
     public var triggerRedraw: UUID?
 
     public var thinkText: String?
+    
+    public var useMarkdown: Bool = true
 
     public init(id: String,
                 user: User,
@@ -64,6 +66,7 @@ public struct Message: Identifiable, Hashable {
                 createdAt: Date = Date(),
                 text: String = "",
                 thinkText: String? = "",
+                useMarkdown: Bool = true,
                 attachments: [Attachment] = [],
                 recording: Recording? = nil,
                 replyMessage: ReplyMessage? = nil) {
@@ -73,6 +76,8 @@ public struct Message: Identifiable, Hashable {
         self.status = status
         self.createdAt = createdAt
         self.text = text
+        self.thinkText = thinkText
+        self.useMarkdown = useMarkdown
         self.attachments = attachments
         self.recording = recording
         self.replyMessage = replyMessage

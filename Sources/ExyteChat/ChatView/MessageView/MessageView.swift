@@ -224,7 +224,7 @@ struct MessageView: View {
     @ViewBuilder
     func textWithTimeView(_ message: Message) -> some View {
         if #available(iOS 17.0, *) {
-            let messageView = LLMMessageTextView(text: message.text, messageUseMarkdown: true, messageId: message.id, isAssistantMessage: !message.user.isCurrentUser, isStreamingMessage: isStreamingMessage, isOutputComplete: isOutputComplete, onAnimationComplete: {
+            let messageView = LLMMessageTextView(text: message.text, messageUseMarkdown: message.useMarkdown, messageId: message.id, isAssistantMessage: !message.user.isCurrentUser, isStreamingMessage: isStreamingMessage, isOutputComplete: isOutputComplete, onAnimationComplete: {
                 // Post notification that animation has completed
                 NotificationCenter.default.post(name: NSNotification.Name("StreamingAnimationCompleted"), object: message.id)
             })
