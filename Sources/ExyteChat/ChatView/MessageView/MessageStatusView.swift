@@ -5,7 +5,6 @@
 import SwiftUI
 
 struct MessageStatusView: View {
-
     @Environment(\.chatTheme) private var theme
 
     let status: Message.Status

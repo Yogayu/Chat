@@ -8,7 +8,6 @@
 import SwiftUI
 
 public struct Message: Identifiable, Hashable {
-
     public enum Status: Equatable, Hashable {
         case sending
         case sent
@@ -36,7 +35,7 @@ public struct Message: Identifiable, Hashable {
                 return true
             case (.read, .read):
                 return true
-            case ( .error(_), .error(_)):
+            case (.error(_), .error(_)):
                 return true
             default:
                 return false
@@ -57,7 +56,7 @@ public struct Message: Identifiable, Hashable {
     public var triggerRedraw: UUID?
 
     public var thinkText: String?
-    
+
     public var useMarkdown: Bool = true
 
     public init(id: String,
@@ -69,8 +68,8 @@ public struct Message: Identifiable, Hashable {
                 useMarkdown: Bool = true,
                 attachments: [Attachment] = [],
                 recording: Recording? = nil,
-                replyMessage: ReplyMessage? = nil) {
-
+                replyMessage: ReplyMessage? = nil)
+    {
         self.id = id
         self.user = user
         self.status = status
@@ -87,25 +86,26 @@ public struct Message: Identifiable, Hashable {
         id: String,
         user: User,
         status: Status? = nil,
-        draft: DraftMessage) async -> Message {
-            let attachments = await draft.medias.asyncCompactMap { media -> Attachment? in
-                guard let thumbnailURL = await media.getThumbnailURL() else {
-                    return nil
-                }
-
-                switch media.type {
-                case .image:
-                    return Attachment(id: UUID().uuidString, url: thumbnailURL, type: .image)
-                case .video:
-                    guard let fullURL = await media.getURL() else {
-                        return nil
-                    }
-                    return Attachment(id: UUID().uuidString, thumbnail: thumbnailURL, full: fullURL, type: .video)
-                }
+        draft: DraftMessage
+    ) async -> Message {
+        let attachments = await draft.medias.asyncCompactMap { media -> Attachment? in
+            guard let thumbnailURL = await media.getThumbnailURL() else {
+                return nil
             }
 
-            return Message(id: id, user: user, status: status, createdAt: draft.createdAt, text: draft.text, attachments: attachments, recording: draft.recording, replyMessage: draft.replyMessage)
+            switch media.type {
+            case .image:
+                return Attachment(id: UUID().uuidString, url: thumbnailURL, type: .image)
+            case .video:
+                guard let fullURL = await media.getURL() else {
+                    return nil
+                }
+                return Attachment(id: UUID().uuidString, thumbnail: thumbnailURL, full: fullURL, type: .video)
+            }
         }
+
+        return Message(id: id, user: user, status: status, createdAt: draft.createdAt, text: draft.text, attachments: attachments, recording: draft.recording, replyMessage: draft.replyMessage)
+    }
 }
 
 extension Message {
@@ -117,13 +117,13 @@ extension Message {
 extension Message: Equatable {
     public static func == (lhs: Message, rhs: Message) -> Bool {
         lhs.id == rhs.id &&
-        lhs.user == rhs.user &&
-        lhs.status == rhs.status &&
-        lhs.createdAt == rhs.createdAt &&
-        lhs.text == rhs.text &&
-        lhs.attachments == rhs.attachments &&
-        lhs.recording == rhs.recording &&
-        lhs.replyMessage == rhs.replyMessage
+            lhs.user == rhs.user &&
+            lhs.status == rhs.status &&
+            lhs.createdAt == rhs.createdAt &&
+            lhs.text == rhs.text &&
+            lhs.attachments == rhs.attachments &&
+            lhs.recording == rhs.recording &&
+            lhs.replyMessage == rhs.replyMessage
     }
 }
 
@@ -142,11 +142,11 @@ public struct Recording: Codable, Hashable {
 public struct ReplyMessage: Codable, Identifiable, Hashable {
     public static func == (lhs: ReplyMessage, rhs: ReplyMessage) -> Bool {
         lhs.id == rhs.id &&
-        lhs.user == rhs.user &&
-        lhs.createdAt == rhs.createdAt &&
-        lhs.text == rhs.text &&
-        lhs.attachments == rhs.attachments &&
-        lhs.recording == rhs.recording
+            lhs.user == rhs.user &&
+            lhs.createdAt == rhs.createdAt &&
+            lhs.text == rhs.text &&
+            lhs.attachments == rhs.attachments &&
+            lhs.recording == rhs.recording
     }
 
     public var id: String
@@ -162,8 +162,8 @@ public struct ReplyMessage: Codable, Identifiable, Hashable {
                 createdAt: Date,
                 text: String = "",
                 attachments: [Attachment] = [],
-                recording: Recording? = nil) {
-
+                recording: Recording? = nil)
+    {
         self.id = id
         self.user = user
         self.createdAt = createdAt
@@ -178,7 +178,6 @@ public struct ReplyMessage: Codable, Identifiable, Hashable {
 }
 
 public extension Message {
-
     func toReplyMessage() -> ReplyMessage {
         ReplyMessage(id: id, user: user, createdAt: createdAt, text: text, attachments: attachments, recording: recording)
     }

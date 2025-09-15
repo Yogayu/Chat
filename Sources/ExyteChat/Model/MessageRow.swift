@@ -61,17 +61,17 @@ struct MessageRow: Equatable {
 
     static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.id == rhs.id
-        && lhs.positionInUserGroup == rhs.positionInUserGroup
-        && lhs.commentsPosition == rhs.commentsPosition
-        && lhs.message.status == rhs.message.status
-        && lhs.message.triggerRedraw == rhs.message.triggerRedraw
-        && lhs.message.text == rhs.message.text
+            && lhs.positionInUserGroup == rhs.positionInUserGroup
+            && lhs.commentsPosition == rhs.commentsPosition
+            && lhs.message.status == rhs.message.status
+            && lhs.message.triggerRedraw == rhs.message.triggerRedraw
+            && lhs.message.text == rhs.message.text
     }
 }
 
 extension MessageRow: Identifiable {
-    public typealias ID = String
-    public var id: String {
+    typealias ID = String
+    var id: String {
         return message.id
     }
 }

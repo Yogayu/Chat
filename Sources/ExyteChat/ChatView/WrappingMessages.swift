@@ -1,6 +1,6 @@
 //
-//  SwiftUIView.swift
-//  
+//  WrappingMessages.swift
+//
 //
 //  Created by Alisa Mylnikova on 06.12.2023.
 //
@@ -8,7 +8,6 @@
 import SwiftUI
 
 extension ChatView {
-
     static func mapMessages(_ messages: [Message], chatType: ChatType, replyMode: ReplyMode) -> [MessagesSection] {
         guard messages.hasUniqueIDs() else {
             fatalError("Messages can not have duplicate ids, please make sure every message gets a unique id")
@@ -26,7 +25,7 @@ extension ChatView {
     }
 
     static func mapMessagesQuoteModeReplies(_ messages: [Message], chatType: ChatType, replyMode: ReplyMode) -> [MessagesSection] {
-        let dates = Set(messages.map({ $0.createdAt.startOfDay() }))
+        let dates = Set(messages.map { $0.createdAt.startOfDay() })
             .sorted()
             .reversed()
         var result: [MessagesSection] = []
@@ -35,7 +34,7 @@ extension ChatView {
             let section = MessagesSection(
                 date: date,
                 // use fake isFirstSection/isLastSection because they are not needed for quote replies
-                rows: wrapSectionMessages(messages.filter({ $0.createdAt.isSameDay(date) }), chatType: chatType, replyMode: replyMode, isFirstSection: false, isLastSection: false)
+                rows: wrapSectionMessages(messages.filter { $0.createdAt.isSameDay(date) }, chatType: chatType, replyMode: replyMode, isFirstSection: false, isLastSection: false)
             )
             result.append(section)
         }
@@ -48,13 +47,13 @@ extension ChatView {
             m.replyMessage == nil
         }
 
-        let dates = Set(firstLevelMessages.map({ $0.createdAt.startOfDay() }))
+        let dates = Set(firstLevelMessages.map { $0.createdAt.startOfDay() })
             .sorted()
             .reversed()
         var result: [MessagesSection] = []
 
         for date in dates {
-            let dayFirstLevelMessages = firstLevelMessages.filter({ $0.createdAt.isSameDay(date) })
+            let dayFirstLevelMessages = firstLevelMessages.filter { $0.createdAt.isSameDay(date) }
             var dayMessages = [Message]() // insert second level in between first level
             for m in dayFirstLevelMessages {
                 var replies = getRepliesFor(id: m.id, messages: messages)
@@ -77,7 +76,7 @@ extension ChatView {
         return result
     }
 
-    static private func getRepliesFor(id: String, messages: [Message]) -> [Message] {
+    private static func getRepliesFor(id: String, messages: [Message]) -> [Message] {
         messages.compactMap { m in
             if m.replyMessage?.id == id {
                 return m
@@ -86,7 +85,7 @@ extension ChatView {
         }
     }
 
-    static private func wrapSectionMessages(_ messages: [Message], chatType: ChatType, replyMode: ReplyMode, isFirstSection: Bool, isLastSection: Bool) -> [MessageRow] {
+    private static func wrapSectionMessages(_ messages: [Message], chatType: ChatType, replyMode: ReplyMode, isFirstSection: Bool, isLastSection: Bool) -> [MessageRow] {
         messages
             .enumerated()
             .map {
@@ -120,9 +119,9 @@ extension ChatView {
                 let prevMessageIsFirstLevel = prevMessage?.replyMessage == nil
 
                 let positionInComments: PositionInCommentsGroup
-                if message.replyMessage == nil && !nextMessageIsAReply {
+                if message.replyMessage == nil, !nextMessageIsAReply {
                     positionInComments = .singleFirstLevelPost
-                } else if message.replyMessage == nil && nextMessageIsAReply {
+                } else if message.replyMessage == nil, nextMessageIsAReply {
                     positionInComments = .firstLevelPostWithComments
                 } else if nextMessageIsFirstLevel {
                     positionInComments = .lastComment
@@ -163,4 +162,3 @@ extension ChatView {
             .reversed()
     }
 }
-

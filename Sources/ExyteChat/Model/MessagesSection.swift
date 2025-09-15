@@ -5,7 +5,6 @@
 import Foundation
 
 struct MessagesSection: Equatable {
-
     let date: Date
     var rows: [MessageRow]
 
@@ -21,5 +20,4 @@ struct MessagesSection: Equatable {
     static func == (lhs: MessagesSection, rhs: MessagesSection) -> Bool {
         lhs.date == rhs.date && lhs.rows == rhs.rows
     }
-
 }

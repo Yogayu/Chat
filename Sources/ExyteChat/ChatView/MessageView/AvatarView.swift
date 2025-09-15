@@ -5,7 +5,6 @@
 import SwiftUI
 
 struct AvatarView: View {
-
     let url: URL?
     let avatarSize: CGFloat
 

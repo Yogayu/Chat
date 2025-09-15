@@ -5,7 +5,6 @@
 import SwiftUI
 
 struct MessageTimeView: View {
-
     let text: String
     let isCurrentUser: Bool
     var chatTheme: ChatTheme
@@ -18,7 +17,6 @@ struct MessageTimeView: View {
 }
 
 struct MessageTimeWithCapsuleView: View {
-
     let text: String
     let isCurrentUser: Bool
     var chatTheme: ChatTheme
@@ -37,4 +35,3 @@ struct MessageTimeWithCapsuleView: View {
             }
     }
 }
-

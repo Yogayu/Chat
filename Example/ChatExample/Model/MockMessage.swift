@@ -2,8 +2,8 @@
 //  Created by Alex.M on 27.06.2022.
 //
 
-import Foundation
 import ExyteChat
+import Foundation
 
 struct MockMessage {
     let uid: String
