@@ -99,9 +99,9 @@ struct MessageView: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: 0) {
-            if !message.user.isCurrentUser {
-                avatarView
-            }
+//            if !message.user.isCurrentUser {
+//                avatarView
+//            }
 
             VStack(alignment: message.user.isCurrentUser ? .trailing : .leading, spacing: 2) {
                 if !isDisplayingMessageMenu, let reply = message.replyMessage?.toMessage() {
