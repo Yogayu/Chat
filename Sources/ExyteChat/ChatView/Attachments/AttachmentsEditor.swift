@@ -5,12 +5,11 @@
 //  Created by Alex.M on 22.06.2022.
 //
 
-import SwiftUI
-import ExyteMediaPicker
 import ActivityIndicatorView
+import ExyteMediaPicker
+import SwiftUI
 
 struct AttachmentsEditor<InputViewContent: View>: View {
-
     typealias InputViewBuilderClosure = ChatView<EmptyView, InputViewContent, DefaultMessageMenuAction>.InputViewBuilderClosure
 
     @Environment(\.chatTheme) var theme
@@ -99,7 +98,10 @@ struct AttachmentsEditor<InputViewContent: View>: View {
                 if !inputViewModel.showPicker {
                     if selectionLimit == 1 && !showFullscreenPreview && userDidSelectMedia {
                         assembleSelectedMedia()
-                        inputViewModel.send()
+                        // Send message for album selection (not camera capture)
+                        if inputViewModel.mediaPickerMode == .photos {
+                            inputViewModel.send()
+                        }
                     }
                     // Reset the flag when picker is closed
                     userDidSelectMedia = false
@@ -111,7 +113,8 @@ struct AttachmentsEditor<InputViewContent: View>: View {
                     albumSelectionBackground: theme.colors.mainBG,
                     fullscreenPhotoBackground: theme.colors.mainBG,
                     cameraBackground: theme.colors.mainBG,
-                    cameraSelectionBackground: theme.colors.mainBG),
+                    cameraSelectionBackground: theme.colors.mainBG
+                ),
                 selection: .init(
                     selectedTint: theme.colors.sendButtonBackground,
                     fullscreenTint: theme.colors.sendButtonBackground
@@ -180,7 +183,7 @@ struct AttachmentsEditor<InputViewContent: View>: View {
         .padding(.bottom, 5)
     }
 
-    func cameraSelectionHeaderView(cancelClosure: @escaping ()->()) -> some View {
+    func cameraSelectionHeaderView(cancelClosure: @escaping () -> Void) -> some View {
         HStack {
             Button {
                 cancelClosure()
