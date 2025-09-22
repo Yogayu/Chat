@@ -24,7 +24,7 @@ let package = Package(
             from: "2.0.2"
         ),
         .package(
-            url: "https://github.com/Lakr233/MarkdownView",
+            url: "https://github.com/Yogayu/MarkdownView",
             from: "3.4.0"
         ),
         .package(
