@@ -224,6 +224,7 @@ private extension InputViewModel {
                 DraftMessage(
                     text: self.text,
                     thinkText: self.thinkText,
+                    performanceData: "",
                     medias: attachments.medias,
                     recording: attachments.recording,
                     replyMessage: attachments.replyMessage,

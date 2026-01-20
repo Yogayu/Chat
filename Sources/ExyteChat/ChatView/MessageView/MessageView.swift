@@ -7,6 +7,8 @@
 
 import SwiftUI
 
+
+
 struct MessageView: View {
     @Environment(\.chatTheme) private var theme
 
@@ -223,40 +225,57 @@ struct MessageView: View {
 
     @ViewBuilder
     func textWithTimeView(_ message: Message) -> some View {
-        if #available(iOS 17.0, *) {
-            let messageView = LLMMessageTextView(text: message.text, messageUseMarkdown: message.useMarkdown, messageId: message.id, isAssistantMessage: !message.user.isCurrentUser, isStreamingMessage: isStreamingMessage, isOutputComplete: isOutputComplete, onAnimationComplete: {
-                // Post notification that animation has completed
-                NotificationCenter.default.post(name: NSNotification.Name("StreamingAnimationCompleted"), object: message.id)
-            })
-            .fixedSize(horizontal: false, vertical: true)
-            .padding(.horizontal, MessageView.horizontalTextPadding)
-            let timeView = messageTimeView()
-                .padding(.trailing, 12)
-
-            HStack(alignment: .lastTextBaseline, spacing: 12) {
-                messageView
-                if !message.attachments.isEmpty {
-                    Spacer()
-                }
-                // timeView
+        VStack(alignment: .leading, spacing: 0) {
+            // Add ThinkView for assistant messages with thinking content
+            if !message.user.isCurrentUser, let thinkText = message.thinkText, !thinkText.isEmpty {
+//                print("DEBUG: Displaying ThinkView with content: '\(thinkText)'")
+                ThinkView(thinkContent: thinkText)
+                    .padding(.horizontal, MessageView.horizontalTextPadding)
+            } else if !message.user.isCurrentUser {
+//                print("DEBUG: No ThinkView - thinkText is nil or empty: '\(message.thinkText ?? "nil")'")
             }
-            .padding(.vertical, 8)
-        } else {
-            let messageView = MessageTextView(text: message.text, messageUseMarkdown: messageUseMarkdown)
+            
+            if #available(iOS 17.0, *) {
+                let messageView = LLMMessageTextView(text: message.text, messageUseMarkdown: message.useMarkdown, messageId: message.id, isAssistantMessage: !message.user.isCurrentUser, isStreamingMessage: isStreamingMessage, isOutputComplete: isOutputComplete, onAnimationComplete: {
+                    // Post notification that animation has completed
+                    NotificationCenter.default.post(name: NSNotification.Name("StreamingAnimationCompleted"), object: message.id)
+                })
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.horizontal, MessageView.horizontalTextPadding)
-            let timeView = messageTimeView()
-                .padding(.trailing, 12)
+                let timeView = messageTimeView()
+                    .padding(.trailing, 12)
 
-            HStack(alignment: .lastTextBaseline, spacing: 12) {
-                messageView
-                if !message.attachments.isEmpty {
-                    Spacer()
+                HStack(alignment: .lastTextBaseline, spacing: 12) {
+                    messageView
+                    if !message.attachments.isEmpty {
+                        Spacer()
+                    }
+                    // timeView
                 }
-                // timeView
+                .padding(.vertical, 8)
+            } else {
+                let messageView = MessageTextView(text: message.text, messageUseMarkdown: messageUseMarkdown)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, MessageView.horizontalTextPadding)
+                let timeView = messageTimeView()
+                    .padding(.trailing, 12)
+
+                HStack(alignment: .lastTextBaseline, spacing: 12) {
+                    messageView
+                    if !message.attachments.isEmpty {
+                        Spacer()
+                    }
+                    // timeView
+                }
+                .padding(.vertical, 8)
+                // Fallback on earlier versions
             }
-            .padding(.vertical, 8)
-            // Fallback on earlier versions
+            
+            // Add PerformanceView for assistant messages with performance data
+            if !message.user.isCurrentUser, let performanceData = message.performanceData, !performanceData.isEmpty {
+                PerformanceView(performanceData: performanceData)
+                    .padding(.horizontal, MessageView.horizontalTextPadding)
+            }
         }
 
         /*

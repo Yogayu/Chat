@@ -56,6 +56,7 @@ public struct Message: Identifiable, Hashable {
     public var triggerRedraw: UUID?
 
     public var thinkText: String?
+    public var performanceData: String?
 
     public var useMarkdown: Bool = true
 
@@ -65,6 +66,7 @@ public struct Message: Identifiable, Hashable {
                 createdAt: Date = Date(),
                 text: String = "",
                 thinkText: String? = "",
+                performanceData: String? = nil,
                 useMarkdown: Bool = true,
                 attachments: [Attachment] = [],
                 recording: Recording? = nil,
@@ -76,6 +78,7 @@ public struct Message: Identifiable, Hashable {
         self.createdAt = createdAt
         self.text = text
         self.thinkText = thinkText
+        self.performanceData = performanceData
         self.useMarkdown = useMarkdown
         self.attachments = attachments
         self.recording = recording
@@ -104,7 +107,7 @@ public struct Message: Identifiable, Hashable {
             }
         }
 
-        return Message(id: id, user: user, status: status, createdAt: draft.createdAt, text: draft.text, attachments: attachments, recording: draft.recording, replyMessage: draft.replyMessage)
+        return Message(id: id, user: user, status: status, createdAt: draft.createdAt, text: draft.text, thinkText: draft.thinkText, performanceData: draft.performanceData, attachments: attachments, recording: draft.recording, replyMessage: draft.replyMessage)
     }
 }
 
@@ -121,6 +124,8 @@ extension Message: Equatable {
             lhs.status == rhs.status &&
             lhs.createdAt == rhs.createdAt &&
             lhs.text == rhs.text &&
+            lhs.thinkText == rhs.thinkText &&
+            lhs.performanceData == rhs.performanceData &&
             lhs.attachments == rhs.attachments &&
             lhs.recording == rhs.recording &&
             lhs.replyMessage == rhs.replyMessage
