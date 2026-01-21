@@ -139,6 +139,9 @@ public struct ChatView<MessageContent: View, InputViewContent: View, MenuAction:
     var isThinkingModeEnabled: Bool = false
     var onThinkingModeToggle: (() -> Void)? = nil
 
+    // MARK: - Default Input Text
+    var defaultInputText: Binding<String>? = nil
+
     @StateObject private var viewModel = ChatViewModel()
     @StateObject private var inputViewModel = InputViewModel()
     @StateObject private var globalFocusState = GlobalFocusState()
@@ -379,6 +382,17 @@ public struct ChatView<MessageContent: View, InputViewContent: View, MenuAction:
                         NotificationCenter.default.post(name: .onScrollToBottom, object: nil)
                     }
                 }
+            }
+
+            // Apply default input text if provided
+            if let defaultText = defaultInputText?.wrappedValue, !defaultText.isEmpty {
+                inputViewModel.text = defaultText
+            }
+        }
+        .onChange(of: defaultInputText?.wrappedValue ?? "") { newValue in
+            // Sync default input text changes
+            if !newValue.isEmpty && inputViewModel.text.isEmpty {
+                inputViewModel.text = newValue
             }
         }
     }
@@ -659,6 +673,17 @@ public extension ChatView {
         view.supportsThinkingMode = supportsThinkingMode
         view.isThinkingModeEnabled = isEnabled
         view.onThinkingModeToggle = onToggle
+        return view
+    }
+
+    // MARK: - Default Input Text Configuration
+
+    /// Set default input text that will be displayed in the input field
+    /// - Parameter text: Binding to the default text
+    /// - Returns: Updated ChatView
+    func setDefaultInputText(_ text: Binding<String>) -> ChatView {
+        var view = self
+        view.defaultInputText = text
         return view
     }
 
