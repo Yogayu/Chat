@@ -11,6 +11,9 @@ struct AttachmentCell: View {
     let attachment: Attachment
     let onTap: (Attachment) -> Void
 
+    @StateObject private var imageSaver = ImageSaver()
+    @State private var showSaveDialog = false
+
     var body: some View {
         Group {
             if attachment.type == .image {
@@ -33,6 +36,24 @@ struct AttachmentCell: View {
         .contentShape(Rectangle())
         .onTapGesture {
             onTap(attachment)
+        }
+        .applyIf(attachment.type == .image) { view in
+            view.onLongPressGesture {
+                showSaveDialog = true
+            }
+        }
+        .confirmationDialog(
+            NSLocalizedString("Save to Photos", comment: "Save image dialog title"),
+            isPresented: $showSaveDialog,
+            titleVisibility: .visible
+        ) {
+            Button(NSLocalizedString("Save to Photos", comment: "Save image to photo library")) {
+                imageSaver.saveToPhotoLibrary(url: attachment.full)
+            }
+            Button(NSLocalizedString("Cancel", comment: "Cancel action"), role: .cancel) {}
+        }
+        .alert(imageSaver.alertMessage, isPresented: $imageSaver.showAlert) {
+            Button("OK", role: .cancel) {}
         }
     }
 

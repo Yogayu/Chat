@@ -11,6 +11,8 @@ struct FullscreenMediaPages: View {
     @Environment(\.mediaPickerTheme) var pickerTheme
 
     @StateObject var viewModel: FullscreenMediaPagesViewModel
+    @StateObject private var imageSaver = ImageSaver()
+    @State private var showSaveDialog = false
     var safeAreaInsets: EdgeInsets
     var onClose: () -> Void
 
@@ -48,6 +50,12 @@ struct FullscreenMediaPages: View {
             .onTapGesture {
                 withAnimation {
                     viewModel.showMinis.toggle()
+                }
+            }
+            .onLongPressGesture {
+                let current = viewModel.attachments[viewModel.index]
+                if current.type == .image {
+                    showSaveDialog = true
                 }
             }
 
@@ -114,32 +122,60 @@ struct FullscreenMediaPages: View {
             }
         }
         .overlay(alignment: .topTrailing) {
-            if viewModel.showMinis, viewModel.attachments[viewModel.index].type == .video {
+            if viewModel.showMinis {
                 HStack(spacing: 20) {
-                    (viewModel.videoPlaying ? theme.images.fullscreenMedia.pause : theme.images.fullscreenMedia.play)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 24, height: 24)
-                        .padding(5)
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            viewModel.toggleVideoPlaying()
-                        }
+                    if viewModel.attachments[viewModel.index].type == .image {
+                        Image(systemName: "square.and.arrow.down")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 22, height: 22)
+                            .padding(5)
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                showSaveDialog = true
+                            }
+                    }
 
-                    (viewModel.videoMuted ? theme.images.fullscreenMedia.unmute : theme.images.fullscreenMedia.mute)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 24, height: 24)
-                        .padding(5)
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            viewModel.toggleVideoMuted()
-                        }
+                    if viewModel.attachments[viewModel.index].type == .video {
+                        (viewModel.videoPlaying ? theme.images.fullscreenMedia.pause : theme.images.fullscreenMedia.play)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 24, height: 24)
+                            .padding(5)
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                viewModel.toggleVideoPlaying()
+                            }
+
+                        (viewModel.videoMuted ? theme.images.fullscreenMedia.unmute : theme.images.fullscreenMedia.mute)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 24, height: 24)
+                            .padding(5)
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                viewModel.toggleVideoMuted()
+                            }
+                    }
                 }
                 .foregroundColor(.white)
                 .padding(.trailing, 10)
                 .offset(y: safeAreaInsets.top - 5)
             }
+        }
+        .confirmationDialog(
+            NSLocalizedString("Save to Photos", comment: "Save image dialog title"),
+            isPresented: $showSaveDialog,
+            titleVisibility: .visible
+        ) {
+            Button(NSLocalizedString("Save to Photos", comment: "Save image to photo library")) {
+                let current = viewModel.attachments[viewModel.index]
+                imageSaver.saveToPhotoLibrary(url: current.full)
+            }
+            Button(NSLocalizedString("Cancel", comment: "Cancel action"), role: .cancel) {}
+        }
+        .alert(imageSaver.alertMessage, isPresented: $imageSaver.showAlert) {
+            Button("OK", role: .cancel) {}
         }
     }
 }

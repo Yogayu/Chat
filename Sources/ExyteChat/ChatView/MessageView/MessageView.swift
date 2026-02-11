@@ -130,8 +130,8 @@ struct MessageView: View {
         }
         .padding(.top, topPadding)
         .padding(.bottom, bottomPadding)
-        .padding(.trailing, message.user.isCurrentUser ? MessageView.horizontalNoAvatarPadding : 0)
-        .padding(message.user.isCurrentUser ? .leading : .trailing, message.user.isCurrentUser ? MessageView.horizontalBubblePadding : 0)
+        .padding(.trailing, message.user.isCurrentUser ? MessageView.horizontalNoAvatarPadding : MessageView.horizontalBubblePadding)
+        .padding(.leading, message.user.isCurrentUser ? MessageView.horizontalBubblePadding : MessageView.horizontalNoAvatarPadding)
         .frame(maxWidth: UIScreen.main.bounds.width, alignment: message.user.isCurrentUser ? .trailing : .leading)
     }
 
